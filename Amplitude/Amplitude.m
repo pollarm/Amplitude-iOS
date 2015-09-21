@@ -283,6 +283,14 @@ NSString *const kAMPRevenueEvent = @"revenue_amount";
     SAFE_ARC_SUPER_DEALLOC();
 }
 
+-(UIApplication*)sharedApplication {
+#ifndef Extension
+    return [UIApplication sharedApplication];
+#else
+    return nil;
+#endif
+}
+
 - (void)initializeApiKey:(NSString*) apiKey
 {
     [self initializeApiKey:apiKey userId:nil setUserId: NO];
@@ -333,7 +341,7 @@ NSString *const kAMPRevenueEvent = @"revenue_amount";
         }
     }];
 
-    UIApplicationState state = [UIApplication sharedApplication].applicationState;
+    UIApplicationState state = [self sharedApplication].applicationState;
     if (state != UIApplicationStateBackground) {
         // If this is called while the app is running in the background, for example
         // via a push notification, don't call enterForeground
@@ -750,7 +758,7 @@ NSString *const kAMPRevenueEvent = @"revenue_amount";
             }
 
             // Upload finished, allow background task to be ended
-            [[UIApplication sharedApplication] endBackgroundTask:_uploadTaskID];
+            [[self sharedApplication] endBackgroundTask:_uploadTaskID];
             _uploadTaskID = UIBackgroundTaskInvalid;
         }
     }];
@@ -766,7 +774,7 @@ NSString *const kAMPRevenueEvent = @"revenue_amount";
 
     // Stop uploading
     if (_uploadTaskID != UIBackgroundTaskInvalid) {
-        [[UIApplication sharedApplication] endBackgroundTask:_uploadTaskID];
+        [[self sharedApplication] endBackgroundTask:_uploadTaskID];
         _uploadTaskID = UIBackgroundTaskInvalid;
     }
     [self runOnBackgroundQueue:^{
@@ -782,12 +790,12 @@ NSString *const kAMPRevenueEvent = @"revenue_amount";
 
     // Stop uploading
     if (_uploadTaskID != UIBackgroundTaskInvalid) {
-        [[UIApplication sharedApplication] endBackgroundTask:_uploadTaskID];
+        [[self sharedApplication] endBackgroundTask:_uploadTaskID];
     }
-    _uploadTaskID = [[UIApplication sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
+    _uploadTaskID = [[self sharedApplication] beginBackgroundTaskWithExpirationHandler:^{
         //Took too long, manually stop
         if (_uploadTaskID != UIBackgroundTaskInvalid) {
-            [[UIApplication sharedApplication] endBackgroundTask:_uploadTaskID];
+            [[self sharedApplication] endBackgroundTask:_uploadTaskID];
             _uploadTaskID = UIBackgroundTaskInvalid;
         }
     }];
